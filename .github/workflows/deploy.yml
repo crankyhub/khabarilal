@@ -1,0 +1,43 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/khabarilaal/htdocs/khabarilaal.com
+            git pull origin main
+            
+            # Install PHP dependencies
+            composer install --no-dev --optimize-autoloader --no-interaction
+            
+            # Run database migrations
+            php artisan migrate --force
+            
+            # Install Node dependencies and build assets
+            npm install
+            npm run build
+            
+            # Optimize Laravel
+            php artisan optimize
+            php artisan view:cache
+            php artisan config:cache
+            php artisan route:cache
+            
+            # Fix permissions (adjust as needed for your web server)
+            sudo chown -R khabarilaal:khabarilaal .
+            chmod -R 775 storage bootstrap/cache
