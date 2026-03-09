@@ -28,12 +28,14 @@ jobs:
             
             # Initialize Git if not already a repo
             if [ ! -d ".git" ]; then
-              echo "Initializing Git repository..."
-              git clone $REPO_URL .
-            else
-              echo "Pulling latest changes..."
-              git pull origin main
+              echo "Initializing/Resetting Git repository..."
+              git init
+              git remote add origin $REPO_URL || git remote set-url origin $REPO_URL
             fi
+            
+            echo "Fetching and resetting to main..."
+            git fetch origin main
+            git reset --hard origin/main
             
             # Find composer
             if command -v composer &> /dev/null; then
