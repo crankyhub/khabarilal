@@ -35,13 +35,13 @@
                         </div>
                         <div>
                             <div style="font-weight: 700; color: var(--brand-black);">{{ $article->title }}</div>
-                            <div style="font-size: 0.8rem; color: var(--text-secondary);">By <strong>{{ $article->user->name }}</strong></div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">By <strong>{{ $article->user?->name ?? 'Unknown' }}</strong></div>
                         </div>
                     </div>
                 </td>
                 <td style="padding: 1rem;">
                     <span style="padding: 0.25rem 0.5rem; background: rgba(59, 130, 246, 0.1); color: var(--accent); border-radius: 0.5rem; font-size: 0.8rem; font-weight: 600;">
-                        {{ $article->category->name }}
+                        {{ $article->category?->name ?? 'Uncategorized' }}
                     </span>
                 </td>
                 <td style="padding: 1rem;">
