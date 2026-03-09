@@ -49,6 +49,12 @@ jobs:
             
             echo "Using composer: $COMPOSER_CMD"
             
+            # Ensure .env exists
+            if [ ! -f ".env" ]; then
+              echo "Error: .env file is missing on the VPS. Please create it first."
+              exit 1
+            fi
+            
             # Install PHP dependencies
             $COMPOSER_CMD install --no-dev --optimize-autoloader --no-interaction
             
