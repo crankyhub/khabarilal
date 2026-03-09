@@ -19,14 +19,39 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /home/khabarilaal/htdocs/khabarilaal.com
-            git pull origin main
+            TARGET_DIR="/home/khabarilaal/htdocs/khabarilaal.com"
+            REPO_URL="https://github.com/crankyhub/khabarilal.git"
+            
+            # Create directory if it doesn't exist
+            mkdir -p $TARGET_DIR
+            cd $TARGET_DIR
+            
+            # Initialize Git if not already a repo
+            if [ ! -d ".git" ]; then
+              echo "Initializing Git repository..."
+              git clone $REPO_URL .
+            else
+              echo "Pulling latest changes..."
+              git pull origin main
+            fi
+            
+            # Check if composer is installed
+            if ! command -v composer &> /dev/null; then
+              echo "Error: composer is not installed on the VPS."
+              exit 1
+            fi
             
             # Install PHP dependencies
             composer install --no-dev --optimize-autoloader --no-interaction
             
             # Run database migrations
             php artisan migrate --force
+            
+            # Check if npm is installed
+            if ! command -v npm &> /dev/null; then
+              echo "Error: npm is not installed on the VPS. Please install node/npm."
+              exit 1
+            fi
             
             # Install Node dependencies and build assets
             npm install
@@ -38,6 +63,5 @@ jobs:
             php artisan config:cache
             php artisan route:cache
             
-            # Fix permissions (adjust as needed for your web server)
-            sudo chown -R khabarilaal:khabarilaal .
+            # Fix permissions (assuming user khabarilaal owns the files)
             chmod -R 775 storage bootstrap/cache
