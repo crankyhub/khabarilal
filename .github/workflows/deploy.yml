@@ -35,14 +35,20 @@ jobs:
               git pull origin main
             fi
             
-            # Check if composer is installed
-            if ! command -v composer &> /dev/null; then
+            # Find composer
+            if command -v composer &> /dev/null; then
+              COMPOSER_CMD="composer"
+            elif [ -f "$HOME/composer.phar" ]; then
+              COMPOSER_CMD="php $HOME/composer.phar"
+            else
               echo "Error: composer is not installed on the VPS."
               exit 1
             fi
             
+            echo "Using composer: $COMPOSER_CMD"
+            
             # Install PHP dependencies
-            composer install --no-dev --optimize-autoloader --no-interaction
+            $COMPOSER_CMD install --no-dev --optimize-autoloader --no-interaction
             
             # Run database migrations
             php artisan migrate --force
