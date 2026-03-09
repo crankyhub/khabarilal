@@ -38,5 +38,10 @@ class Reporter extends Model
     {
         return $this->hasMany(ReporterRating::class);
     }
+
+    public function articles()
+    {
+        return $this->hasMany(Article::class, 'user_id', 'user_id');
+    }
 }
 

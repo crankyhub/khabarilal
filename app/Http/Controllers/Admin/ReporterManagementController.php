@@ -14,10 +14,58 @@ class ReporterManagementController extends Controller
     public function index()
     {
         $reporters = Reporter::with(['user', 'category'])
-            ->withCount('user as articles_count')
+            ->withCount('articles')
             ->get();
             
         return view('admin.reporters.index', compact('reporters'));
+    }
+
+    public function create()
+    {
+        $categories = Category::all();
+        $roles = [
+            User::ROLE_REPORTER => 'Reporter',
+            User::ROLE_EDITOR => 'Editor',
+            User::ROLE_SUB_EDITOR => 'Sub Editor',
+            User::ROLE_SUPER_ADMIN => 'Super Admin',
+            User::ROLE_GUEST => 'Guest Contributor',
+        ];
+        return view('admin.reporters.create', compact('categories', 'roles'));
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8',
+            'role' => 'required|string',
+            'beat' => 'nullable|string',
+            'category_id' => 'nullable|exists:categories,id',
+            'bio' => 'nullable|string',
+            'revenue_share' => 'required|numeric|min:0|max:100',
+        ]);
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($validated) {
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => \Illuminate\Support\Facades\Hash::make($validated['password']),
+                'role' => $validated['role'],
+                'status' => User::STATUS_ACTIVE,
+            ]);
+
+            Reporter::create([
+                'user_id' => $user->id,
+                'beat' => $validated['beat'],
+                'category_id' => $validated['category_id'],
+                'bio' => $validated['bio'],
+                'revenue_share' => $validated['revenue_share'],
+                'status' => 'active',
+            ]);
+        });
+
+        return redirect()->route('admin.reporters.index')->with('success', 'Reporter created successfully.');
     }
 
     public function edit(Reporter $reporter)

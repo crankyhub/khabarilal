@@ -23,12 +23,37 @@
             <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;">Minimum 8 characters.</p>
         </div>
 
+        <div class="form-group">
+            <label class="form-label">User Role</label>
+            <select name="role" class="form-control" required>
+                @foreach($roles as $value => $label)
+                    <option value="{{ $value }}" {{ $value === 'reporter' ? 'selected' : '' }}>{{ $label }}</option>
+                @endforeach
+            </select>
+        </div>
+
         <hr style="border: 0; border-top: 1px solid var(--border); margin: 2rem 0;">
         
         <h4 style="margin-bottom: 1.5rem; color: var(--accent);">Professional Profile</h4>
         <div class="form-group">
             <label class="form-label">Beat / Specialty</label>
             <input type="text" name="beat" class="form-control" placeholder="e.g. Sports, local Politics">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Primary Category</label>
+            <select name="category_id" class="form-control">
+                <option value="">-- Select Category --</option>
+                @foreach($categories as $category)
+                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Revenue Share (%)</label>
+            <input type="number" name="revenue_share" class="form-control" value="0" min="0" max="100" required>
+            <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;">Percentage of ad revenue shared with this reporter.</p>
         </div>
 
         <div class="form-group">

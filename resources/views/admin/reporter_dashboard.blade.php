@@ -11,7 +11,7 @@
 <div class="dashboard-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
     <div class="card stat-card" style="border-left: 4px solid var(--accent);">
         <h3 style="color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem;">Estimated Earnings</h3>
-        <p style="font-size: 1.8rem; font-weight: 800; color: var(--brand-black);">${{ number_format($stats['earnings'], 2) }}</p>
+        <p style="font-size: 1.8rem; font-weight: 800; color: var(--brand-black);">₹{{ number_format($stats['earnings'], 2) }}</p>
         <div style="font-size: 0.75rem; color: #10b981; margin-top: 0.5rem;">Based on {{ $reporter->revenue_share }}% revenue share</div>
     </div>
     
@@ -87,7 +87,7 @@
         <div style="margin-top: 2rem;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #334155;">
                 <span style="color: #94a3b8;">Base CPM</span>
-                <span style="font-weight: 700;">$10.00</span>
+                <span style="font-weight: 700;">₹10.00</span>
             </div>
             <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #334155;">
                 <span style="color: #94a3b8;">Total Impressions</span>
@@ -95,11 +95,11 @@
             </div>
             <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #334155;">
                 <span style="color: #94a3b8;">Platform Revenue</span>
-                <span style="font-weight: 700;">${{ number_format(($stats['total_views'] / 1000) * 10, 2) }}</span>
+                <span style="font-weight: 700;">₹{{ number_format(($stats['total_views'] / 1000) * 10, 2) }}</span>
             </div>
             <div style="display: flex; justify-content: space-between; margin-top: 2rem;">
                 <span style="font-weight: 700; color: var(--brand-red);">Your Share ({{ $reporter->revenue_share }}%)</span>
-                <span style="font-size: 1.5rem; font-weight: 800; color: #fff;">${{ number_format($stats['earnings'], 2) }}</span>
+                <span style="font-size: 1.5rem; font-weight: 800; color: #fff;">₹{{ number_format($stats['earnings'], 2) }}</span>
             </div>
         </div>
         
