@@ -1,0 +1,47 @@
+<?php
+
+namespace App\Http\Controllers\Public;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
+use App\Models\Article;
+
+class ArticleController extends Controller
+{
+    public function show($slug, Request $request)
+    {
+        $article = \Illuminate\Support\Facades\Cache::remember("article_{$slug}", 3600, function() use ($slug) {
+            return Article::with(['category', 'user', 'tags', 'media'])->where('slug', $slug)
+                ->where('status', 'published')
+                ->where('published_at', '<=', now())
+                ->firstOrFail();
+        });
+
+        $article->increment('views_count');
+
+        // Capture Analytics
+        \App\Models\Analytic::create([
+            'article_id' => $article->id,
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'referrer' => $request->header('referer'),
+            'device_type' => $this->getDeviceType($request->userAgent()),
+            'visited_at' => now(),
+        ]);
+            
+        return view('articles.show', compact('article'));
+    }
+
+    private function getDeviceType($userAgent)
+    {
+        $userAgent = strtolower($userAgent);
+        if (str_contains($userAgent, 'mobile') || str_contains($userAgent, 'android') || str_contains($userAgent, 'iphone')) {
+            return 'mobile';
+        }
+        if (str_contains($userAgent, 'tablet') || str_contains($userAgent, 'ipad')) {
+            return 'tablet';
+        }
+        return 'desktop';
+    }
+}

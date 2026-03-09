@@ -1,0 +1,689 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap');
+
+:root {
+    /* Global & Brand Specifics (From Logo) */
+    --brand-red: #be1e2d;
+    --brand-yellow: #f9c80e;
+    --brand-black: #1a1a1b;
+    --brand-white: #ffffff;
+
+    --bg-light: #ffffff;
+    --bg-body: #f8fafb;
+    --text-main: #1a1a1b;
+    --text-muted: #6b7280;
+    --accent-red: var(--brand-red);
+    --border-light: #e5e7eb;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+
+    /* Admin Specifics */
+    --bg-card: #ffffff;
+    --border: #e2e8f0;
+    --accent: var(--brand-red);
+    --text-secondary: #64748b;
+    --success: #10b981;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+}
+
+h1,
+h2,
+h3,
+h4,
+.brand-font {
+    font-family: 'Outfit', sans-serif;
+}
+
+/* Container */
+.container {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    width: 100%;
+}
+
+/* Utilities */
+.card {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+    padding: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-main);
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-light);
+    border-radius: 0.5rem;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    outline: none;
+}
+
+.form-control:focus {
+    border-color: var(--brand-red);
+    box-shadow: 0 0 0 3px rgba(190, 30, 45, 0.1);
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.65rem 1.25rem;
+    font-weight: 700;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: var(--brand-red);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: #a31a26;
+}
+
+/* Auth Specific Overrides */
+body.auth-body {
+    background: #0f172a;
+    color: #fff;
+}
+
+.auth-body .form-label {
+    color: #94a3b8;
+}
+
+.auth-body .form-control {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.auth-body .card {
+    background: rgba(30, 41, 59, 0.7);
+    backdrop-filter: blur(10px);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+
+/* =========================================
+   Admin Layout (Brand Palette)
+   ========================================= */
+
+.admin-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 260px;
+    background: var(--brand-black);
+    color: #fff;
+    padding: 1.5rem 0;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    z-index: 1001;
+    overflow-x: hidden;
+}
+
+.sidebar.collapsed {
+    width: 70px;
+}
+
+.brand {
+    padding: 0 1.5rem 2rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--brand-yellow);
+    white-space: nowrap;
+}
+
+.nav-links {
+    list-style: none;
+    padding: 0;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.85rem 1.5rem;
+    color: #94a3b8;
+    text-decoration: none;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    border-left: 4px solid var(--brand-red);
+}
+
+.main-content {
+    flex: 1;
+    padding: 2rem;
+    background: var(--bg-body);
+    transition: margin 0.3s ease;
+}
+
+.sidebar-toggle {
+    position: fixed;
+    left: 240px;
+    top: 1.5rem;
+    background: var(--brand-red);
+    color: #fff;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 1002;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: left 0.3s;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-toggle.collapsed {
+    left: 55px;
+}
+
+.user-footer {
+    margin-top: auto;
+    padding: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.main-header h2 {
+    font-weight: 800;
+    color: var(--brand-black);
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        left: -260px;
+    }
+
+    .sidebar.active {
+        left: 0;
+    }
+}
+
+/* =========================================
+   Frontend Layout (Khabar-i-Lal Brand)
+   ========================================= */
+
+.hindustan-header {
+    background: var(--brand-yellow);
+    padding: 1rem 0;
+    border-bottom: 3px solid var(--brand-red);
+}
+
+.header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.burger-menu {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.burger-menu span {
+    width: 24px;
+    height: 2px;
+    background: #333;
+}
+
+.logo-link {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.header-util {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    color: #4b5563;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.util-item {
+    cursor: pointer;
+}
+
+.util-item:hover {
+    color: var(--brand-red);
+}
+
+.sign-in {
+    color: var(--brand-red);
+    font-weight: 700;
+}
+
+.search-box {
+    position: relative;
+}
+
+.search-box input {
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 2rem;
+    padding: 0.5rem 1.5rem;
+    width: 200px;
+    font-size: 0.9rem;
+    outline: none;
+}
+
+.search-icon {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.5;
+}
+
+.secondary-nav {
+    background: #ffffff;
+    border-bottom: 1px solid var(--border-light);
+    padding: 0.5rem 0;
+    box-shadow: var(--shadow-sm);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.pill-nav {
+    display: flex;
+    gap: 1.5rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.pill-nav::-webkit-scrollbar {
+    display: none;
+}
+
+.pill-item {
+    text-decoration: none;
+    color: var(--brand-black);
+    font-weight: 700;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    padding: 0.4rem 0.85rem;
+    border-radius: 2rem;
+    transition: all 0.2s;
+}
+
+.pill-item:hover,
+.pill-item.active {
+    background: var(--brand-red);
+    color: #fff;
+}
+
+/* Hero Section */
+.layout-grid {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 2rem;
+}
+
+.hero-hindustan {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 2rem;
+    margin: 2rem 0 3rem;
+}
+
+.featured-big {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    height: 480px;
+    display: block;
+    text-decoration: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.featured-big img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.featured-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.95));
+    padding: 5rem 2rem 2rem;
+    color: #fff;
+}
+
+.trending-label {
+    background: #000;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 2px;
+}
+
+.featured-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.list-item-h {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 1.25rem;
+    text-decoration: none;
+    color: inherit;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.list-thumb {
+    height: 90px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f3f4f6;
+}
+
+.list-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.list-info h4 {
+    font-size: 1.05rem;
+    line-height: 1.4;
+    font-weight: 800;
+    color: var(--brand-black);
+}
+
+.list-meta {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+}
+
+/* Article Feed */
+.feed-item-horizontal {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    text-decoration: none;
+    color: inherit;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #eee;
+}
+
+.feed-item-thumb {
+    width: 200px;
+    height: 120px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.feed-item-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.feed-item-info {
+    flex: 1;
+}
+
+.feed-item-info h3 {
+    font-size: 1.4rem;
+    margin-bottom: 0.5rem;
+}
+
+.feed-item-meta {
+    font-size: 0.85rem;
+    color: #6b7280;
+}
+
+/* Sidebar */
+.ad-container {
+    background: #fff;
+    padding: 1rem;
+    text-align: center;
+    border: 1px solid var(--border-light);
+    margin: 2rem 0;
+}
+
+.ad-label {
+    font-size: 0.65rem;
+    color: #999;
+    margin-bottom: 0.5rem;
+}
+
+.ad-box {
+    height: 250px;
+    background: #fef9c3;
+    border: 1px dashed #fbbf24;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #b45309;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.must-read-card {
+    background: #fff;
+    border: 1px solid var(--border-light);
+    padding: 1.5rem;
+    border-radius: 12px;
+}
+
+.must-read-title {
+    font-size: 1.2rem;
+    font-weight: 900;
+    border-left: 5px solid var(--brand-red);
+    padding-left: 1rem;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+}
+
+.sidebar-item {
+    display: flex;
+    gap: 0.75rem;
+    text-decoration: none;
+    color: inherit;
+    margin-bottom: 1.25rem;
+}
+
+.sidebar-thumb {
+    width: 80px;
+    height: 60px;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #eee;
+    flex-shrink: 0;
+}
+
+.sidebar-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.sidebar-info {
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+/* Footer */
+.main-footer {
+    background: #ffffff;
+    border-top: 2px solid var(--accent-red);
+    margin-top: 4rem;
+    padding: 4rem 0;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 3rem;
+}
+
+.footer-logo {
+    color: var(--accent-red);
+    font-size: 1.75rem;
+    font-weight: 900;
+}
+
+/* =========================================
+   Responsive Overrides
+   ========================================= */
+
+@media (max-width: 1024px) {
+    .layout-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-hindustan {
+        grid-template-columns: 1fr;
+    }
+
+    .header-util {
+        gap: 1rem;
+        font-size: 0.85rem;
+    }
+
+    .search-box input {
+        width: 150px;
+    }
+}
+
+@media (max-width: 768px) {
+    .header-util {
+        display: none;
+    }
+
+    .header-left {
+        gap: 1rem;
+    }
+
+    .logo-link img {
+        height: 35px !important;
+    }
+
+    .logo-fallback-text {
+        font-size: 1.5rem !important;
+    }
+
+    .featured-big {
+        height: 320px;
+    }
+
+    .featured-content h2 {
+        font-size: 1.5rem;
+    }
+
+    .list-item-h {
+        grid-template-columns: 100px 1fr;
+        gap: 1rem;
+    }
+
+    .list-thumb {
+        height: 70px;
+    }
+
+    .list-info h4 {
+        font-size: 0.9rem;
+    }
+
+    .feed-item-horizontal {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .feed-item-thumb {
+        width: 100%;
+        height: 200px;
+    }
+
+    .feed-item-info h3 {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .featured-big {
+        height: 250px;
+    }
+
+    .featured-content {
+        padding: 3rem 1rem 1rem;
+    }
+
+    .featured-content h2 {
+        font-size: 1.2rem;
+    }
+
+    .burger-menu {
+        order: -1;
+    }
+
+    .header-inner {
+        justify-content: center;
+        gap: 1rem;
+    }
+}
