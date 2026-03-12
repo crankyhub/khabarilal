@@ -63,14 +63,8 @@
 
                     <div class="form-group" style="margin-top: 1.5rem;">
                         <label class="form-label">Tags</label>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; max-height: 200px; overflow-y: auto; padding: 1rem; background: var(--bg-dark); border-radius: 0.5rem; border: 1px solid var(--border);">
-                            @foreach($tags as $tag)
-                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.85rem; color: var(--text-secondary);">
-                                    <input type="checkbox" name="tags[]" value="{{ $tag->id }}" {{ $article->tags->contains($tag->id) ? 'checked' : '' }}>
-                                    <span>{{ $tag->name }}</span>
-                                </label>
-                            @endforeach
-                        </div>
+                        <input type="text" name="tags" class="form-control" placeholder="news, sports, चुनाव..." value="{{ old('tags', $article->tags->pluck('name')->implode(', ')) }}">
+                        <p style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 0.3rem;">Separate tags with commas.</p>
                     </div>
 
                     <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 1rem;">
@@ -79,8 +73,14 @@
                 </div>
 
                 <div class="card" style="margin-bottom: 1.5rem; background: rgba(15, 23, 42, 0.5);">
-                    <h4>SEO Settings</h4>
+                    <h4>SEO & URL Settings</h4>
                     <div class="form-group" style="margin-top: 1rem;">
+                        <label class="form-label">Article Slug (URL)</label>
+                        <input type="text" name="slug" id="article-slug" class="form-control" value="{{ $article->slug }}" placeholder="custom-url-path...">
+                        <p style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 0.3rem;">Current URL: {{ urldecode(url('article/' . $article->slug)) }}</p>
+                        @error('slug') <span style="color: var(--danger); font-size: 0.8rem;">{{ $message }}</span> @enderror
+                    </div>
+                    <div class="form-group">
                         <label class="form-label">Meta Title</label>
                         <input type="text" name="meta_title" class="form-control" value="{{ $article->meta_title }}" placeholder="Search engine title...">
                     </div>
@@ -150,6 +150,28 @@
             } else {
                 publishDateGroup.style.display = 'none';
             }
+        });
+    }
+
+    // Auto-slug generation
+    const titleInput = document.querySelector('input[name="title"]');
+    const slugInput = document.getElementById('article-slug');
+    let isSlugManual = {{ $article->slug ? 'true' : 'false' }};
+
+    if (titleInput && slugInput) {
+        titleInput.addEventListener('input', function() {
+            if (!isSlugManual) {
+                slugInput.value = this.value
+                    .toLowerCase()
+                    .trim()
+                    .replace(/[^\p{L}\p{N}\p{M}\s-]/gu, '')
+                    .replace(/[\s_-]+/g, '-')
+                    .replace(/^-+|-+$/g, '');
+            }
+        });
+
+        slugInput.addEventListener('input', function() {
+            isSlugManual = true;
         });
     }
 </script>

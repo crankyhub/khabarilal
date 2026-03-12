@@ -35,6 +35,11 @@
     <header class="hindustan-header">
         <div class="container header-inner">
             <div class="header-left">
+                <button class="burger-menu" id="drawer-toggle" aria-label="Menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
                 <a href="/" class="logo-link">
                     @if(App\Models\Setting::get('site_logo'))
                         <img src="{{ asset('storage/' . App\Models\Setting::get('site_logo')) }}" alt="Logo" style="height: {{ App\Models\Setting::get('site_logo_height', '45') }}px;">
@@ -43,6 +48,9 @@
                         <h1 class="logo-fallback-text">हिन्दुस्तान</h1>
                     @endif
                 </a>
+                <div class="inshorts-toggle-btn" id="inshorts-toggle" onclick="toggleInshortView()">
+                    ⚡ Inshorts
+                </div>
             </div>
 
             <div class="header-util">
@@ -63,9 +71,9 @@
     <nav class="secondary-nav">
         <div class="container">
             <div class="pill-nav">
-                <a href="/" class="pill-item active">होम</a>
+                <a href="/" class="pill-item {{ !isset($currentCategory) ? 'active' : '' }}">होम</a>
                 @foreach(\App\Models\Category::whereNull('parent_id')->get() as $cat)
-                    <a href="{{ route('category.show', $cat->slug) }}" class="pill-item">{{ $cat->name }}</a>
+                    <a href="{{ route('category.show', $cat->slug) }}" class="pill-item {{ (isset($currentCategory) && $currentCategory->id == $cat->id) ? 'active' : '' }}">{{ $cat->name }}</a>
                 @endforeach
             </div>
         </div>
@@ -114,13 +122,7 @@
 
     <main class="container main-content-wrapper">
         
-        {{-- Topic Chip Scroller --}}
-        <div class="topic-scroller">
-            <div class="trending-icon">⚡</div>
-            @foreach(\App\Models\Tag::take(10)->get() as $tag)
-                <a href="{{ route('tag.show', $tag->slug) }}" class="topic-chip">{{ $tag->name }}</a>
-            @endforeach
-        </div>
+
 
         <div class="layout-grid">
             <div class="main-column">
@@ -237,6 +239,11 @@
                 <h4>संपर्क</h4>
                 <p>ईमेल: support@khabarilal.com<br>फोन: +91 120 1234567</p>
             </div>
+            <div class="footer-goto-top">
+                <button onclick="scrollToTop()" title="Go to Top">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+                </button>
+            </div>
         </div>
     </footer>
 
@@ -250,5 +257,108 @@
             </div>
         </div>
     @endif
+    {{-- Mobile Drawer --}}
+    <div class="drawer-overlay" id="drawer-overlay"></div>
+    <div class="mobile-drawer" id="mobile-drawer">
+        <div class="drawer-header">
+            <a href="/" class="drawer-logo">Khabari Laal</a>
+            <button class="drawer-close" id="drawer-close">✕</button>
+        </div>
+        <nav class="drawer-nav">
+            <a href="/" class="drawer-item">होम</a>
+            @foreach(\App\Models\Category::whereNull('parent_id')->get() as $cat)
+                <a href="{{ route('category.show', $cat->slug) }}" class="drawer-item">{{ $cat->name }}</a>
+            @endforeach
+        </nav>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggle = document.getElementById('drawer-toggle');
+            const close = document.getElementById('drawer-close');
+            const drawer = document.getElementById('mobile-drawer');
+            const overlay = document.getElementById('drawer-overlay');
+            const body = document.body;
+
+            function toggleDrawer() {
+                drawer.classList.toggle('active');
+                overlay.classList.toggle('active');
+                body.classList.toggle('drawer-open');
+            }
+
+            toggle.addEventListener('click', toggleDrawer);
+            close.addEventListener('click', toggleDrawer);
+            overlay.addEventListener('click', toggleDrawer);
+        });
+
+        const articles = {!! json_encode($articles->take(20)->map(function($a) {
+            return [
+                'title' => $a->title,
+                'content' => $a->summary ? strip_tags($a->summary) : \Str::limit(strip_tags($a->body), 200),
+                'image' => ($a->media_id && $a->media) ? $a->media->url : ($a->image_path ? asset('storage/'.$a->image_path) : null),
+                'url' => route('article.show', $a->slug),
+                'meta' => ($a->published_at ? $a->published_at->format('M d, Y') : $a->created_at->format('M d, Y')) . ' • Khabari Laal'
+            ];
+        })->toArray()) !!};
+
+        function toggleInshortView() {
+            const container = document.getElementById('inshorts-container');
+            const body = document.body;
+            const btn = document.getElementById('inshorts-toggle');
+            
+            if (container.classList.contains('active')) {
+                container.classList.remove('active');
+                body.classList.remove('inshorts-active');
+                btn.classList.remove('active');
+            } else {
+                if (container.children.length === 0) {
+                    renderInshorts();
+                }
+                container.classList.add('active');
+                body.classList.add('inshorts-active');
+                btn.classList.add('active');
+            }
+        }
+
+        function renderInshorts() {
+            const container = document.getElementById('inshorts-container');
+            container.innerHTML = '<button class="inshorts-close" onclick="toggleInshortView()">✕</button>';
+            
+            articles.forEach(article => {
+                const card = document.createElement('div');
+                card.className = 'inshorts-card';
+                card.innerHTML = `
+                    <div class="inshorts-card-img">
+                        ${article.image ? `<img src="${article.image}" alt="">` : ''}
+                    </div>
+                    <div class="inshorts-card-content">
+                        <h2>${article.title}</h2>
+                        <p>${article.content}</p>
+                        <div class="inshorts-card-footer">
+                            <span class="inshorts-meta">${article.meta}</span>
+                            <a href="${article.url}" class="inshorts-read-more">Read Full Story →</a>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        window.addEventListener('scroll', function() {
+            const btn = document.querySelector('.footer-goto-top');
+            if (window.pageYOffset > 300) {
+                btn.classList.add('visible');
+            } else {
+                btn.classList.remove('visible');
+            }
+        });
+    </script>
+    <div class="inshorts-container" id="inshorts-container"></div>
 </body>
 </html>

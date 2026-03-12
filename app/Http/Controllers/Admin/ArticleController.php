@@ -69,14 +69,16 @@ class ArticleController extends Controller
             'status' => 'required|in:draft,published',
             'published_at' => 'nullable|date',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'tags' => 'nullable|array',
-            'tags.*' => 'exists:tags,id',
+            'tags' => 'nullable|string',
             'media_id' => 'nullable|exists:media,id',
             'gallery_images' => 'nullable|array',
             'gallery_images.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120',
+            'slug' => 'nullable|string|max:255|unique:articles,slug',
         ]);
 
-        $validated['slug'] = Str::slug($validated['title']);
+        $validated['slug'] = $validated['slug'] ?: $validated['title'];
+        // Unicode-friendly slug generation (preserves Hindi letters and marks)
+        $validated['slug'] = trim(preg_replace('/[^\p{L}\p{N}\p{M}]+/u', '-', strtolower($validated['slug'])), '-');
         $validated['user_id'] = auth()->id();
         
         if (!auth()->user()->canApproveArticles()) {
@@ -105,8 +107,20 @@ class ArticleController extends Controller
         $validated['is_breaking'] = $request->boolean('is_breaking');
         $article = Article::create($validated);
 
-        if ($request->has('tags')) {
-            $article->tags()->sync($request->tags);
+        if ($request->filled('tags')) {
+            $tagNames = explode(',', $request->tags);
+            $tagIds = [];
+            foreach ($tagNames as $name) {
+                $name = trim($name);
+                if ($name) {
+                    $tag = Tag::firstOrCreate(
+                        ['slug' => Str::slug($name)],
+                        ['name' => $name]
+                    );
+                    $tagIds[] = $tag->id;
+                }
+            }
+            $article->tags()->sync($tagIds);
         }
 
         if ($request->hasFile('gallery_images')) {
@@ -147,8 +161,7 @@ class ArticleController extends Controller
             'status' => 'required|in:draft,published',
             'published_at' => 'nullable|date',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'tags' => 'nullable|array',
-            'tags.*' => 'exists:tags,id',
+            'tags' => 'nullable|string',
             'media_id' => 'nullable|exists:media,id',
             'gallery_images' => 'nullable|array',
             'gallery_images.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120',
@@ -156,8 +169,16 @@ class ArticleController extends Controller
             'remove_gallery.*' => 'exists:media,id',
         ]);
 
-        if ($validated['title'] !== $article->title) {
-            $validated['slug'] = Str::slug($validated['title']);
+        if ($request->filled('slug')) {
+            $validated['slug'] = trim(preg_replace('/[^\p{L}\p{N}\p{M}]+/u', '-', strtolower($request->slug)), '-');
+            if ($validated['slug'] !== $article->slug) {
+                $count = Article::where('slug', 'like', $validated['slug'] . '%')->where('id', '!=', $article->id)->count();
+                if ($count > 0) {
+                    $validated['slug'] .= '-' . ($count + 1);
+                }
+            }
+        } elseif ($validated['title'] !== $article->title) {
+            $validated['slug'] = trim(preg_replace('/[^\p{L}\p{N}\p{M}]+/u', '-', strtolower($validated['title'])), '-');
             $count = Article::where('slug', 'like', $validated['slug'] . '%')->where('id', '!=', $article->id)->count();
             if ($count > 0) {
                 $validated['slug'] .= '-' . ($count + 1);
@@ -193,8 +214,20 @@ class ArticleController extends Controller
         $article->update($validated);
         \Illuminate\Support\Facades\Cache::forget("article_{$article->slug}");
 
-        if ($request->has('tags')) {
-            $article->tags()->sync($request->tags);
+        if ($request->filled('tags')) {
+            $tagNames = explode(',', $request->tags);
+            $tagIds = [];
+            foreach ($tagNames as $name) {
+                $name = trim($name);
+                if ($name) {
+                    $tag = Tag::firstOrCreate(
+                        ['slug' => Str::slug($name)],
+                        ['name' => $name]
+                    );
+                    $tagIds[] = $tag->id;
+                }
+            }
+            $article->tags()->sync($tagIds);
         } else {
             $article->tags()->detach();
         }

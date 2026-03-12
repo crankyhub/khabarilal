@@ -167,12 +167,15 @@ class AdController extends Controller
 
     public function destroy(Ad $ad)
     {
-        foreach ($ad->placements as $placement) {
-            if ($placement->image_path) {
-                Storage::disk('public')->delete($placement->image_path);
+        return DB::transaction(function () use ($ad) {
+            foreach ($ad->placements as $placement) {
+                if ($placement->image_path) {
+                    Storage::disk('public')->delete($placement->image_path);
+                }
+                $placement->delete();
             }
-        }
-        $ad->delete();
-        return redirect()->route('admin.ads.index')->with('success', 'Advertisement removed.');
+            $ad->delete();
+            return redirect()->route('admin.ads.index')->with('success', 'Advertisement removed.');
+        });
     }
 }
