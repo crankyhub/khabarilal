@@ -102,6 +102,7 @@ class AdController extends Controller
             'cost_per_impression' => 'required|numeric|min:0',
             'cost_per_click' => 'required|numeric|min:0',
             'status' => 'required|in:active,paused,exhausted,expired',
+            'is_active' => 'nullable|boolean',
             'placements' => 'required|array|min:1',
         ]);
 

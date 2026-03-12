@@ -8,6 +8,17 @@
         </div>
     </div>
 
+    @if ($errors->any())
+        <div class="alert alert-danger shadow-sm mb-4">
+            <h5 class="font-weight-bold"><i class="fas fa-exclamation-triangle"></i> Oops! Something went wrong:</h5>
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <form action="{{ route('admin.ads.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
         
@@ -21,30 +32,39 @@
                     <div class="card-body">
                         <div class="form-group">
                             <label>Campaign Title</label>
-                            <input type="text" name="title" class="form-control" placeholder="e.g. Summer Festival 2026" required>
+                            <input type="text" name="title" class="form-control @error('title') is-invalid @enderror" placeholder="e.g. Summer Festival 2026" value="{{ old('title') }}" required>
+                            @error('title')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                         
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Target Category (Optional)</label>
-                                    <select name="category_id" class="form-control">
+                                    <select name="category_id" class="form-control @error('category_id') is-invalid @enderror">
                                         <option value="">All Categories (Universal)</option>
                                         @foreach($categories as $cat)
-                                            <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                                            <option value="{{ $cat->id }}" {{ old('category_id') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
                                         @endforeach
                                     </select>
+                                    @error('category_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Target Specific Article (Optional)</label>
-                                    <select name="article_id" class="form-control">
+                                    <select name="article_id" class="form-control @error('article_id') is-invalid @enderror">
                                         <option value="">None (Site-wide or Category-wide)</option>
                                         @foreach($articles as $art)
-                                            <option value="{{ $art->id }}">{{ $art->title }}</option>
+                                            <option value="{{ $art->id }}" {{ old('article_id') == $art->id ? 'selected' : '' }}>{{ $art->title }}</option>
                                         @endforeach
                                     </select>
+                                    @error('article_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                         </div>
@@ -53,13 +73,19 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Start Date</label>
-                                    <input type="datetime-local" name="start_date" class="form-control">
+                                    <input type="datetime-local" name="start_date" class="form-control @error('start_date') is-invalid @enderror" value="{{ old('start_date') }}">
+                                    @error('start_date')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>End Date</label>
-                                    <input type="datetime-local" name="end_date" class="form-control">
+                                    <input type="datetime-local" name="end_date" class="form-control @error('end_date') is-invalid @enderror" value="{{ old('end_date') }}">
+                                    @error('end_date')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                         </div>
@@ -88,6 +114,7 @@
                                 <div class="custom-control custom-checkbox mb-3">
                                     <input type="checkbox" class="custom-control-input placement-toggle" 
                                            id="check_{{ $key }}" name="placements[{{ $key }}][active]" 
+                                           {{ old("placements.$key.active") ? 'checked' : '' }}
                                            onchange="togglePlacement('{{ $key }}')">
                                     <label class="custom-control-label font-weight-bold" for="check_{{ $key }}">
                                         {{ $pos['label'] }} <span class="small text-muted font-weight-normal">({{ $pos['desc'] }})</span>
@@ -136,7 +163,10 @@
                     <div class="card-body">
                         <div class="form-group">
                             <label>Total Budget (INR)</label>
-                            <input type="number" step="0.01" name="total_budget" class="form-control" value="100.00" required>
+                            <input type="number" step="0.01" name="total_budget" class="form-control @error('total_budget') is-invalid @enderror" value="{{ old('total_budget', '100.00') }}" required>
+                            @error('total_budget')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                             <small class="text-muted">Campaign stops when this amount is exhausted.</small>
                         </div>
                         <div class="form-group">
@@ -158,7 +188,7 @@
                             <input type="number" name="limit_clicks" class="form-control" value="0">
                         </div>
                         <div class="form-group custom-control custom-switch">
-                            <input type="checkbox" name="is_active" class="custom-control-input" id="isActive" checked>
+                            <input type="checkbox" name="is_active" class="custom-control-input" id="isActive" value="1" {{ old('is_active', true) ? 'checked' : '' }}>
                             <label class="custom-control-label" for="isActive">Campaign Enabled</label>
                         </div>
                         <button type="submit" class="btn btn-primary btn-block p-3 font-weight-bold">

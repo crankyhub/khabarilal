@@ -389,7 +389,7 @@ body.auth-body {
     align-items: center;
     white-space: nowrap;
     height: 100%;
-    animation: ticker-scrolling 60s linear infinite;
+    animation: ticker-scrolling 30s linear infinite;
     padding-left: 2rem;
 }
 
@@ -425,6 +425,84 @@ body.auth-body {
 
     100% {
         transform: translateX(-50%);
+    }
+}
+
+/* Advertisement Styles */
+.ad-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 100000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(10px, 3vw, 40px);
+    backdrop-filter: blur(4px);
+}
+
+.ad-popup-container {
+    position: relative;
+    max-width: 95vw;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.ad-popup-container .ad-placement {
+    max-width: 100%;
+    max-height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ad-popup-container img {
+    max-width: 100%;
+    max-height: 90vh;
+    border-radius: 8px;
+    object-fit: contain;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
+.ad-popup-close {
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #fff;
+    border: none;
+    color: #000;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    z-index: 10;
+    transition: transform 0.2s, background 0.2s;
+}
+
+.ad-popup-close:hover {
+    transform: scale(1.1);
+    background: #f1f1f1;
+}
+
+@media (max-width: 480px) {
+    .ad-popup-close {
+        top: -10px;
+        right: -10px;
+        width: 28px;
+        height: 28px;
+        font-size: 0.9rem;
     }
 }
 

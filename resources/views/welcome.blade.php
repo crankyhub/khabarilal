@@ -82,7 +82,7 @@
     @if($breakingNews->count() > 0)
         <div class="breaking-news-ticker">
             <div class="container ticker-wrapper">
-                <div class="ticker-label">BREAKING NEWS</div>
+                <div class="ticker-label">BREAKING</div>
                 <div class="ticker-content">
                     <div class="ticker-scroll">
                         @foreach($breakingNews as $news)
@@ -243,9 +243,9 @@
     {{-- Popup Ad --}}
     @php $popupAd = \App\Helpers\AdHelper::getAd('popup', isset($currentCategory) ? $currentCategory->id : null); @endphp
     @if($popupAd)
-        <div id="ad-popup-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 20px;">
-            <div style="position: relative; max-width: 90%; max-height: 90%;">
-                <button onclick="document.getElementById('ad-popup-overlay').style.display='none'" style="position: absolute; top: -15px; right: -15px; width: 30px; height: 30px; border-radius: 50%; background: #fff; border: none; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">✕</button>
+        <div id="ad-popup-overlay" class="ad-popup-overlay">
+            <div class="ad-popup-container">
+                <button class="ad-popup-close" onclick="document.getElementById('ad-popup-overlay').style.display='none'">✕</button>
                 {!! \App\Helpers\AdHelper::render($popupAd) !!}
             </div>
         </div>
