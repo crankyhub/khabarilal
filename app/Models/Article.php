@@ -21,6 +21,7 @@ class Article extends Model
         'moderation_status',
         'rejection_reason',
         'is_ai_generated',
+        'is_breaking',
         'published_at'
     ];
 

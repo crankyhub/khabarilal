@@ -17,6 +17,7 @@ class ArticleController extends Controller
     const MODERATION_PENDING = 'pending';
     const MODERATION_APPROVED = 'approved';
     const MODERATION_REJECTED = 'rejected';
+    const MODERATION_UNPUBLISHED = 'unpublished';
 
     public function approve(Article $article)
     {
@@ -37,7 +38,12 @@ class ArticleController extends Controller
     {
         $query = Article::with(['category', 'user']);
 
-        if (!auth()->user()->canApproveArticles()) {
+        if (auth()->user()->canApproveArticles()) {
+            $query->where(function($q) {
+                $q->where('status', 'published')
+                  ->orWhere('user_id', auth()->id());
+            });
+        } else {
             $query->where('user_id', auth()->id());
         }
 
@@ -73,6 +79,12 @@ class ArticleController extends Controller
         $validated['slug'] = Str::slug($validated['title']);
         $validated['user_id'] = auth()->id();
         
+        if (!auth()->user()->canApproveArticles()) {
+            $validated['moderation_status'] = ($validated['status'] === 'published') 
+                ? self::MODERATION_PENDING 
+                : self::MODERATION_UNPUBLISHED;
+        }
+        
         if ($validated['status'] === 'published') {
             $validated['published_at'] = $validated['published_at'] ?? now();
         } else {
@@ -90,6 +102,7 @@ class ArticleController extends Controller
             $validated['slug'] .= '-' . ($count + 1);
         }
 
+        $validated['is_breaking'] = $request->boolean('is_breaking');
         $article = Article::create($validated);
 
         if ($request->has('tags')) {
@@ -170,6 +183,13 @@ class ArticleController extends Controller
             abort(403, 'Unauthorized access to this article.');
         }
 
+        if (!auth()->user()->canApproveArticles()) {
+            $validated['moderation_status'] = ($validated['status'] === 'published') 
+                ? self::MODERATION_PENDING 
+                : self::MODERATION_UNPUBLISHED;
+        }
+
+        $validated['is_breaking'] = $request->boolean('is_breaking');
         $article->update($validated);
         \Illuminate\Support\Facades\Cache::forget("article_{$article->slug}");
 
@@ -202,8 +222,13 @@ class ArticleController extends Controller
 
     public function destroy(Article $article)
     {
-        if (!auth()->user()->canApproveArticles() && $article->user_id !== auth()->id()) {
-            abort(403, 'Unauthorized access.');
+        if (!auth()->user()->canApproveArticles()) {
+            if ($article->user_id !== auth()->id()) {
+                abort(403, 'Unauthorized access.');
+            }
+            if ($article->moderation_status === self::MODERATION_APPROVED) {
+                abort(403, 'You cannot delete an article once it has been approved.');
+            }
         }
 
         $article->delete();

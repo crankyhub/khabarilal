@@ -14,6 +14,7 @@ class ArticleController extends Controller
         $article = \Illuminate\Support\Facades\Cache::remember("article_{$slug}", 3600, function() use ($slug) {
             return Article::with(['category', 'user', 'tags', 'media'])->where('slug', $slug)
                 ->where('status', 'published')
+                ->where('moderation_status', 'approved')
                 ->where('published_at', '<=', now())
                 ->firstOrFail();
         });

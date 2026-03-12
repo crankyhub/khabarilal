@@ -14,6 +14,7 @@ class SearchController extends Controller
         
         $articles = Article::with(['category', 'user'])
             ->where('status', 'published')
+            ->where('moderation_status', 'approved')
             ->where('published_at', '<=', now())
             ->where(function($q) use ($query) {
                 $q->where('title', 'LIKE', "%{$query}%")

@@ -14,6 +14,7 @@ class HomeController extends Controller
     {
         $articles = Article::with(['category', 'user'])
             ->where('status', 'published')
+            ->where('moderation_status', 'approved')
             ->where('published_at', '<=', now())
             ->latest('published_at')
             ->take(10)
@@ -28,6 +29,7 @@ class HomeController extends Controller
         $articles = Article::with(['category', 'user'])
             ->where('category_id', $currentCategory->id)
             ->where('status', 'published')
+            ->where('moderation_status', 'approved')
             ->where('published_at', '<=', now())
             ->latest('published_at')
             ->paginate(12);
@@ -43,6 +45,7 @@ class HomeController extends Controller
                 $query->where('tags.id', $tag->id);
             })
             ->where('status', 'published')
+            ->where('moderation_status', 'approved')
             ->where('published_at', '<=', now())
             ->latest('published_at')
             ->paginate(12);
@@ -57,6 +60,7 @@ class HomeController extends Controller
     {
         $articles = Article::with(['category', 'user'])
             ->where('status', 'published')
+            ->where('moderation_status', 'approved')
             ->where('published_at', '<=', now())
             ->latest('published_at')
             ->take(20)

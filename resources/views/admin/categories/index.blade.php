@@ -6,7 +6,9 @@
 <div class="card">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <h3>Category List</h3>
-        <a href="{{ route('admin.categories.create') }}" class="btn btn-primary">+ Create Category</a>
+        @unless(auth()->user()->isReporter())
+            <a href="{{ route('admin.categories.create') }}" class="btn btn-primary">+ Create Category</a>
+        @endunless
     </div>
 
     <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
@@ -33,13 +35,15 @@
                     @endif
                 </td>
                 <td style="padding: 1rem;">
-                    <div style="display: flex; gap: 0.5rem;">
-                        <a href="{{ route('admin.categories.edit', $category) }}" style="color: var(--accent); text-decoration: none; font-weight: 500;">Edit</a>
-                        <form action="{{ route('admin.categories.destroy', $category) }}" method="POST" onsubmit="return confirm('Delete this category?')">
-                            @csrf @method('DELETE')
-                            <button type="submit" style="background: none; border: none; color: var(--danger); cursor: pointer; font-weight: 500; font-family: inherit;">Delete</button>
-                        </form>
-                    </div>
+                    @unless(auth()->user()->isReporter())
+                        <div style="display: flex; gap: 0.5rem;">
+                            <a href="{{ route('admin.categories.edit', $category) }}" style="color: var(--accent); text-decoration: none; font-weight: 500;">Edit</a>
+                            <form action="{{ route('admin.categories.destroy', $category) }}" method="POST" onsubmit="return confirm('Delete this category?')">
+                                @csrf @method('DELETE')
+                                <button type="submit" style="background: none; border: none; color: var(--danger); cursor: pointer; font-weight: 500; font-family: inherit;">Delete</button>
+                            </form>
+                        </div>
+                    @endunless
                 </td>
             </tr>
             @endforeach

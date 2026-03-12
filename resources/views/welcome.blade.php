@@ -5,8 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ App\Models\Setting::get('site_name', 'Hindustan') }} - Hindi News Portal</title>
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ filemtime(public_path('css/app.css')) }}">
     <link rel="icon" type="image/png" href="{{ App\Models\Setting::get('site_favicon') ? asset('storage/' . App\Models\Setting::get('site_favicon')) : '/favicon.png' }}">
+    
+    <style>
+        :root {
+            --header-bg: {{ App\Models\Setting::get('header_bg_color', '#f9c80e') }};
+            --header-text: #ffffff;
+        }
+        .hindustan-header {
+            background: var(--header-bg) !important;
+            color: var(--header-text) !important;
+        }
+        .hindustan-header .header-util,
+        .hindustan-header .util-item,
+        .hindustan-header .logo-fallback-text,
+        .hindustan-header .search-icon,
+        .hindustan-header .sign-in {
+            color: var(--header-text) !important;
+        }
+        .hindustan-header .burger-menu span {
+            background: var(--header-text) !important;
+        }
+    </style>
 </head>
 <body class="brand-body">
 
@@ -49,6 +70,47 @@
             </div>
         </div>
     </nav>
+
+    {{-- Breaking News Ticker --}}
+    @php
+        $breakingNews = \App\Models\Article::where('is_breaking', true)
+            ->where('status', 'published')
+            ->latest()
+            ->get();
+    @endphp
+
+    @if($breakingNews->count() > 0)
+        <div class="breaking-news-ticker">
+            <div class="container ticker-wrapper">
+                <div class="ticker-label">BREAKING NEWS</div>
+                <div class="ticker-content">
+                    <div class="ticker-scroll">
+                        @foreach($breakingNews as $news)
+                            <a href="{{ route('article.show', $news->slug) }}" class="ticker-item">
+                                <span class="ticker-bullet">•</span>
+                                {{ $news->title }}
+                            </a>
+                        @endforeach
+                        {{-- Duplicate for seamless loop --}}
+                        @foreach($breakingNews as $news)
+                            <a href="{{ route('article.show', $news->slug) }}" class="ticker-item">
+                                <span class="ticker-bullet">•</span>
+                                {{ $news->title }}
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+    
+    @php $topAd = \App\Helpers\AdHelper::getAd('top_banner', isset($currentCategory) ? $currentCategory->id : null); @endphp
+    @if($topAd)
+        <div class="container" style="margin-top: 1rem; text-align: center;">
+            <div style="font-size: 0.65rem; color: #94a3b8; margin-bottom: 0.2rem; text-transform: uppercase;">Advertisement</div>
+            {!! \App\Helpers\AdHelper::render($topAd) !!}
+        </div>
+    @endif
 
     <main class="container main-content-wrapper">
         
@@ -115,15 +177,32 @@
                             </div>
                         </a>
                     @endforeach
+
+                    @php 
+                        $feedAd = \App\Helpers\AdHelper::getAd('in_feed', isset($currentCategory) ? $currentCategory->id : null); 
+                    @endphp
+                    @if($feedAd)
+                        <div style="margin: 2rem 0;">
+                            {!! \App\Helpers\AdHelper::render($feedAd) !!}
+                        </div>
+                    @endif
                 </div>
             </div>
 
             {{-- Sidebar --}}
-            <aside class="sidebar-column">
-                <div class="ad-container">
-                    <div class="ad-label">विज्ञापन</div>
-                    <div class="ad-box">SIDBEAR AD 300x250</div>
-                </div>
+            <aside class="site-sidebar">
+                @php 
+                    $catId = isset($currentCategory) ? $currentCategory->id : null;
+                    $sidebarAd = \App\Helpers\AdHelper::getAd('sidebar', $catId); 
+                @endphp
+                @if($sidebarAd)
+                    {!! \App\Helpers\AdHelper::render($sidebarAd) !!}
+                @else
+                    <div class="ad-container">
+                        <div class="ad-label">विज्ञापन</div>
+                        <div class="ad-box">SIDBEAR AD 300x250</div>
+                    </div>
+                @endif
 
                 <div class="must-read-card">
                     <div class="must-read-title">जरूर पढ़ें</div>
@@ -160,5 +239,16 @@
             </div>
         </div>
     </footer>
+
+    {{-- Popup Ad --}}
+    @php $popupAd = \App\Helpers\AdHelper::getAd('popup', isset($currentCategory) ? $currentCategory->id : null); @endphp
+    @if($popupAd)
+        <div id="ad-popup-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 20px;">
+            <div style="position: relative; max-width: 90%; max-height: 90%;">
+                <button onclick="document.getElementById('ad-popup-overlay').style.display='none'" style="position: absolute; top: -15px; right: -15px; width: 30px; height: 30px; border-radius: 50%; background: #fff; border: none; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">✕</button>
+                {!! \App\Helpers\AdHelper::render($popupAd) !!}
+            </div>
+        </div>
+    @endif
 </body>
 </html>

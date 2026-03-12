@@ -140,6 +140,16 @@
                 </div>
             @endif
 
+            @if(session('impersonator_id'))
+                <div style="background: var(--brand-yellow); color: var(--brand-black); padding: 0.75rem 1.5rem; display: flex; justify-content: space-between; align-items: center; margin: -2rem -2rem 2rem -2rem; font-weight: 700; border-bottom: 2px solid var(--brand-red);">
+                    <span>⚠️ YOU ARE CURRENTLY IMPERSONATING: {{ auth()->user()->name }}</span>
+                    <form action="{{ route('admin.stop-impersonating') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="btn btn-primary" style="padding: 0.4rem 1rem; font-size: 0.8rem; background: var(--brand-red);">Return to Admin</button>
+                    </form>
+                </div>
+            @endif
+
             @yield('content')
         </main>
     </div>

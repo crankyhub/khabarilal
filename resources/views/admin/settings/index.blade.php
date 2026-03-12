@@ -50,6 +50,26 @@
             <small style="color: var(--text-secondary);">Recommended size: 32x32px (ICO/PNG)</small>
         </div>
 
+        <div class="form-group">
+            <label class="form-label">Header Background Color</label>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <input type="color" name="header_bg_color" id="header_bg_color" 
+                       value="{{ $settings['header_bg_color'] }}" 
+                       class="form-control" style="width: 100px; height: 45px; padding: 2px;">
+                <button type="button" class="btn" style="background: #eee; color: #333;" onclick="randomizeHeaderColor()">
+                    🎲 Randomize
+                </button>
+            </div>
+            <small style="color: var(--text-secondary);">This will change the main header's background color.</small>
+        </div>
+
+        <script>
+            function randomizeHeaderColor() {
+                const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+                document.getElementById('header_bg_color').value = randomColor;
+            }
+        </script>
+
         <div style="margin-top: 2rem;">
             <button type="submit" class="btn btn-primary">Save Branding</button>
         </div>

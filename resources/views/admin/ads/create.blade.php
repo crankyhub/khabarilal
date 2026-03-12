@@ -1,51 +1,193 @@
 @extends('layouts.admin')
 
-@section('header', 'Create Advertisement')
-
 @section('content')
-<div class="card" style="max-width: 800px; margin: 0 auto;">
-    <form action="{{ route('admin.ads.store') }}" method="POST">
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h3 mb-0 text-gray-800">Create Multi-Position Campaign</h1>
+        </div>
+    </div>
+
+    <form action="{{ route('admin.ads.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
-        <div class="form-group">
-            <label class="form-label">Ad Title (Internal Reference)</label>
-            <input type="text" name="title" class="form-control" placeholder="e.g. Summer Sale 2026 Banner" required>
-        </div>
+        
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- General Settings -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">General Campaign Settings</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Campaign Title</label>
+                            <input type="text" name="title" class="form-control" placeholder="e.g. Summer Festival 2026" required>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Target Category (Optional)</label>
+                                    <select name="category_id" class="form-control">
+                                        <option value="">All Categories (Universal)</option>
+                                        @foreach($categories as $cat)
+                                            <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Target Specific Article (Optional)</label>
+                                    <select name="article_id" class="form-control">
+                                        <option value="">None (Site-wide or Category-wide)</option>
+                                        @foreach($articles as $art)
+                                            <option value="{{ $art->id }}">{{ $art->title }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-            <div class="form-group">
-                <label class="form-label">Ad Placement Type</label>
-                <select name="type" class="form-control" required>
-                    <option value="banner">Top Banner</option>
-                    <option value="sidebar">Sidebar Widget</option>
-                    <option value="in-article">In-Article Content</option>
-                </select>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Start Date</label>
+                                    <input type="datetime-local" name="start_date" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>End Date</label>
+                                    <input type="datetime-local" name="end_date" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Placements -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Ad Placements & Creatives</h6>
+                        <small class="text-muted">Select all positions where this ad should appear.</small>
+                    </div>
+                    <div class="card-body">
+                        @php
+                            $positions = [
+                                'top_banner' => ['label' => 'Top Banner', 'desc' => 'Recommended: 728x90px'],
+                                'sidebar' => ['label' => 'Sidebar Widget', 'desc' => 'Recommended: 300x250px'],
+                                'in_feed' => ['label' => 'In-Feed Ad', 'desc' => 'Recommended: 600x300px'],
+                                'article_bottom' => ['label' => 'Article Bottom', 'desc' => 'Recommended: 728x90px or 600x300px'],
+                                'popup' => ['label' => 'Popup / Overlay', 'desc' => 'Recommended: 500x500px or Large Responsive']
+                            ];
+                        @endphp
+
+                        @foreach($positions as $key => $pos)
+                            <div class="placement-group mb-4 p-3 border rounded">
+                                <div class="custom-control custom-checkbox mb-3">
+                                    <input type="checkbox" class="custom-control-input placement-toggle" 
+                                           id="check_{{ $key }}" name="placements[{{ $key }}][active]" 
+                                           onchange="togglePlacement('{{ $key }}')">
+                                    <label class="custom-control-label font-weight-bold" for="check_{{ $key }}">
+                                        {{ $pos['label'] }} <span class="small text-muted font-weight-normal">({{ $pos['desc'] }})</span>
+                                    </label>
+                                </div>
+
+                                <div id="fields_{{ $key }}" class="placement-fields" style="display: none; border-top: 1px solid #eee; padding-top: 15px;">
+                                    <div class="form-group">
+                                        <label>Creative Type</label>
+                                        <select name="placements[{{ $key }}][type]" class="form-control" onchange="toggleType('{{ $key }}', this.value)">
+                                            <option value="image">Image Display</option>
+                                            <option value="script">Custom Script / HTML</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="type-image-group_{{ $key }}">
+                                        <div class="form-group">
+                                            <label>Upload Image</label>
+                                            <input type="file" name="placements[{{ $key }}][image]" class="form-control-file">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Destination URL</label>
+                                            <input type="url" name="placements[{{ $key }}][link_url]" class="form-control" placeholder="https://example.com/promo">
+                                        </div>
+                                    </div>
+
+                                    <div class="type-script-group_{{ $key }}" style="display: none;">
+                                        <div class="form-group">
+                                            <label>Script / HTML Content</label>
+                                            <textarea name="placements[{{ $key }}][content]" class="form-control" rows="4" placeholder='<a href="#"><img src="..."></a> or <script>...</script>'></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label class="form-label">Vertical Position / Key</label>
-                <input type="text" name="position" class="form-control" placeholder="e.g. home_top, article_sidebar" required>
+
+            <div class="col-lg-4">
+                <!-- Budgeting -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Budget & Limits</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Total Budget (INR)</label>
+                            <input type="number" step="0.01" name="total_budget" class="form-control" value="100.00" required>
+                            <small class="text-muted">Campaign stops when this amount is exhausted.</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Cost Per Impression (INR)</label>
+                            <input type="number" step="0.0001" name="cost_per_impression" class="form-control" value="0.50" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Cost Per Click (INR)</label>
+                            <input type="number" step="0.01" name="cost_per_click" class="form-control" value="5.00" required>
+                        </div>
+                        <hr>
+                        <div class="form-group">
+                            <label>Impression Limit</label>
+                            <input type="number" name="limit_impressions" class="form-control" value="0">
+                            <small class="text-muted">0 for unlimited (limited only by budget).</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Click Limit</label>
+                            <input type="number" name="limit_clicks" class="form-control" value="0">
+                        </div>
+                        <div class="form-group custom-control custom-switch">
+                            <input type="checkbox" name="is_active" class="custom-control-input" id="isActive" checked>
+                            <label class="custom-control-label" for="isActive">Campaign Enabled</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block p-3 font-weight-bold">
+                            LAUNCH AD CAMPAIGN
+                        </button>
+                    </div>
+                </div>
             </div>
-        </div>
-
-        <div class="form-group">
-            <label class="form-label">Destination URL (Optional)</label>
-            <input type="url" name="link_url" class="form-control" placeholder="https://example.com/promo">
-        </div>
-
-        <div class="form-group">
-            <label class="form-label">Ad Content (Internal Snippet or HTML)</label>
-            <textarea name="content" class="form-control" rows="8" placeholder="Enter HTML snippet, AdSense code, or image URL..." required></textarea>
-            <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.5rem;">For simple image ads, you can just paste the image URL here.</p>
-        </div>
-
-        <div class="form-group" style="margin-top: 2rem; display: flex; align-items: center; gap: 0.75rem;">
-            <input type="checkbox" name="is_active" id="is_active" checked value="1" style="width: 1.25rem; height: 1.25rem; cursor: pointer;">
-            <label for="is_active" style="cursor: pointer; font-weight: 600;">Enable advertisement immediately</label>
-        </div>
-
-        <div style="margin-top: 3rem; display: flex; gap: 1rem;">
-            <button type="submit" class="btn btn-primary" style="padding: 1rem 2rem;">Create Advertisement</button>
-            <a href="{{ route('admin.ads.index') }}" class="btn btn-outline" style="padding: 1rem 2rem; border: 1px solid var(--border); color: var(--text-secondary); text-decoration: none;">Cancel</a>
         </div>
     </form>
 </div>
+
+<script>
+    function togglePlacement(pos) {
+        const fields = document.getElementById('fields_' + pos);
+        fields.style.display = document.getElementById('check_' + pos).checked ? 'block' : 'none';
+    }
+
+    function toggleType(pos, type) {
+        const imgGroup = document.querySelector('.type-image-group_' + pos);
+        const scriptGroup = document.querySelector('.type-script-group_' + pos);
+        
+        if (type === 'image') {
+            imgGroup.style.display = 'block';
+            scriptGroup.style.display = 'none';
+        } else {
+            imgGroup.style.display = 'none';
+            scriptGroup.style.display = 'block';
+        }
+    }
+</script>
 @endsection

@@ -81,6 +81,68 @@
             display: flex;
             align-items: center;
         }
+
+        /* Gallery Styles */
+        .gallery-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 45px;
+            height: 45px;
+            background: rgba(255,255,255,0.9);
+            border: 1px solid #ddd;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--brand-black);
+        }
+        .gallery-nav-btn:hover {
+            background: var(--brand-red);
+            color: white;
+            border-color: var(--brand-red);
+            transform: translateY(-50%) scale(1.1);
+        }
+        .gallery-nav-btn.left { left: -22px; }
+        .gallery-nav-btn.right { right: -22px; }
+        
+        #gallery-container::-webkit-scrollbar { display: none; }
+        
+        @media (max-width: 768px) {
+            .gallery-nav-btn { display: none; }
+        }
+
+        /* Lightbox Zoom Styles */
+        #lightbox {
+            overflow: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.3) transparent;
+        }
+        #lightbox::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        #lightbox::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 10px;
+        }
+        #lightbox-img {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: zoom-in;
+            user-select: none;
+        }
+        #lightbox-img.zoomed {
+            max-width: none !important;
+            max-height: none !important;
+            cursor: zoom-out;
+            display: block;
+            margin: 5rem auto;
+        }
     </style>
 </head>
 <body>
@@ -97,10 +159,18 @@
         </div>
     </header>
 
+    @php $topAd = \App\Helpers\AdHelper::getAd('top_banner', $article->category_id, $article->id); @endphp
+    @if($topAd)
+        <div class="container" style="margin-top: 2rem; text-align: center;">
+             <div style="font-size: 0.65rem; color: #94a3b8; margin-bottom: 0.2rem; text-transform: uppercase;">Advertisement</div>
+            {!! \App\Helpers\AdHelper::render($topAd) !!}
+        </div>
+    @endif
+
     <article class="container" style="margin-top: 2rem; margin-bottom: 5rem;">
         <div class="article-meta-section">
             <span style="color: var(--brand-red); font-weight: 800; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px;">
-                {{ $article->category->name }}
+                {{ $article->category->name ?? 'News' }}
             </span>
             <h1 class="article-title">{{ $article->title }}</h1>
             
@@ -140,6 +210,16 @@
                     {!! $article->body !!}
                 </div>
 
+                @php 
+                    $bottomAd = \App\Helpers\AdHelper::getAd('article_bottom', $article->category_id, $article->id); 
+                @endphp
+                @if($bottomAd)
+                    <div style="margin-top: 3rem; padding: 2rem; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center;">
+                        <div style="font-size: 0.65rem; color: #94a3b8; margin-bottom: 1rem; text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Sponsor Advertisment</div>
+                        {!! \App\Helpers\AdHelper::render($bottomAd) !!}
+                    </div>
+                @endif
+
                 @if($article->tags->count() > 0)
                     <div style="margin-top: 3rem; display: flex; flex-wrap: wrap; gap: 0.75rem;">
                         @foreach($article->tags as $tag)
@@ -153,31 +233,83 @@
                 @if($article->gallery->count() > 0)
                     <div style="margin-top: 4rem;">
                         <h3 style="font-size: 1.5rem; margin-bottom: 2rem; border-left: 5px solid var(--brand-red); padding-left: 1rem;">Photo Gallery</h3>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem;">
-                            @foreach($article->gallery as $media)
-                                <div class="gallery-item" style="border-radius: 12px; overflow: hidden; height: 200px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: transform 0.3s;">
-                                    <img src="{{ $media->url }}" style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;" onclick="openLightbox(this.src)">
-                                </div>
-                            @endforeach
+                        
+                        <div style="position: relative;">
+                            <button class="gallery-nav-btn left" onclick="scrollGallery(-1)">←</button>
+                            
+                            <div id="gallery-container" style="display: flex; overflow-x: auto; scroll-behavior: smooth; gap: 1.5rem; scrollbar-width: none; -ms-overflow-style: none; padding-bottom: 0.5rem;">
+                                @foreach($article->gallery as $media)
+                                    <div class="gallery-item" style="flex: 0 0 300px; border-radius: 12px; overflow: hidden; height: 200px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: transform 0.3s; scroll-snap-align: start;">
+                                        <img src="{{ $media->url }}" style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;" onclick="openLightbox(this.src)" loading="lazy">
+                                    </div>
+                                @endforeach
+                            </div>
+
+                            <button class="gallery-nav-btn right" onclick="scrollGallery(1)">→</button>
                         </div>
                     </div>
 
                     {{-- Simple Lightbox --}}
-                    <div id="lightbox" onclick="this.style.display='none'" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; cursor: zoom-out; align-items: center; justify-content: center; padding: 2rem;">
-                        <img id="lightbox-img" style="max-width: 100%; max-height: 100%; border-radius: 8px; box-shadow: 0 0 50px rgba(0,0,0,0.5);">
+                    <div id="lightbox" onclick="closeLightbox(event)" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; align-items: center; justify-content: center; padding: 2rem;">
+                        <img id="lightbox-img" onclick="toggleZoom(event)" style="max-width: 100%; max-height: 100%; border-radius: 8px; box-shadow: 0 0 50px rgba(0,0,0,0.5);">
                     </div>
 
                     <script>
                         function openLightbox(src) {
                             const lb = document.getElementById('lightbox');
-                            document.getElementById('lightbox-img').src = src;
+                            const img = document.getElementById('lightbox-img');
+                            img.src = src;
+                            img.classList.remove('zoomed');
                             lb.style.display = 'flex';
+                            lb.style.alignItems = 'center';
+                            document.body.style.overflow = 'hidden'; // Prevent background scroll
+                        }
+
+                        function closeLightbox(event) {
+                            if (event.target.id === 'lightbox') {
+                                document.getElementById('lightbox').style.display = 'none';
+                                document.body.style.overflow = 'auto';
+                            }
+                        }
+
+                        function toggleZoom(event) {
+                            event.stopPropagation();
+                            const img = document.getElementById('lightbox-img');
+                            const lb = document.getElementById('lightbox');
+                            img.classList.toggle('zoomed');
+                            
+                            if (img.classList.contains('zoomed')) {
+                                lb.style.display = 'block';
+                                lb.style.textAlign = 'center';
+                            } else {
+                                lb.style.display = 'flex';
+                                lb.style.alignItems = 'center';
+                                lb.style.textAlign = 'left';
+                            }
+                        }
+
+                        function scrollGallery(direction) {
+                            const container = document.getElementById('gallery-container');
+                            const scrollAmount = direction * 320; // Width of item + gap
+                            container.scrollBy({
+                                left: scrollAmount,
+                                behavior: 'smooth'
+                            });
                         }
                     </script>
                 @endif
             </div>
 
-            <aside class="sidebar-column">
+            <aside class="site-sidebar">
+                @php 
+                    $sidebarAd = \App\Helpers\AdHelper::getAd('sidebar', $article->category_id, $article->id); 
+                @endphp
+                @if($sidebarAd)
+                    <div style="margin-bottom: 2rem;">
+                        {!! \App\Helpers\AdHelper::render($sidebarAd) !!}
+                    </div>
+                @endif
+
                 <div class="card" style="position: sticky; top: 100px;">
                     <h3 style="font-size: 1.3rem; margin-bottom: 1.5rem; border-left: 5px solid var(--brand-red); padding-left: 1rem;">Trending</h3>
                     @foreach(\App\Models\Article::where('status', 'published')->orderBy('views_count', 'desc')->take(5)->get() as $trend)
@@ -214,5 +346,16 @@
             &copy; 2026 Khabar-i-Lal News Portel. All rights reserved.
         </div>
     </footer>
+
+    {{-- Popup Ad --}}
+    @php $popupAd = \App\Helpers\AdHelper::getAd('popup', $article->category_id, $article->id); @endphp
+    @if($popupAd)
+        <div id="ad-popup-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 20px;">
+            <div style="position: relative; max-width: 90%; max-height: 90%;">
+                <button onclick="document.getElementById('ad-popup-overlay').style.display='none'" style="position: absolute; top: -15px; right: -15px; width: 30px; height: 30px; border-radius: 50%; background: #fff; border: none; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">✕</button>
+                {!! \App\Helpers\AdHelper::render($popupAd) !!}
+            </div>
+        </div>
+    @endif
 </body>
 </html>

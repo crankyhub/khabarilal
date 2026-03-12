@@ -39,6 +39,13 @@
                         </select>
                     </div>
 
+                    <div class="form-group" id="breaking-news-group" style="margin-top: 1rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.9rem; color: #fff;">
+                            <input type="checkbox" name="is_breaking" value="1" {{ $article->is_breaking ? 'checked' : '' }}>
+                            <span style="font-weight: 600; color: #facc15;">🔥 Mark as Breaking News</span>
+                        </label>
+                    </div>
+
                     <div class="form-group" id="publish-date-group" style="{{ $article->status === 'published' ? 'display: block;' : 'display: none;' }}">
                         <label class="form-label">Publication Date</label>
                         <input type="datetime-local" name="published_at" class="form-control" value="{{ $article->published_at ? $article->published_at->format('Y-m-d\TH:i') : '' }}">

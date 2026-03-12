@@ -21,7 +21,11 @@
     --accent: var(--brand-red);
     --text-secondary: #64748b;
     --success: #10b981;
+    --danger: #ef4444;
 }
+
+.text-danger { color: var(--danger) !important; }
+.text-success { color: var(--success) !important; }
 
 * {
     margin: 0;
@@ -142,7 +146,7 @@ body.auth-body {
     min-height: 100vh;
 }
 
-.sidebar {
+.admin-layout .sidebar {
     width: 260px;
     background: var(--brand-black);
     color: #fff;
@@ -157,7 +161,7 @@ body.auth-body {
     overflow-x: hidden;
 }
 
-.sidebar.collapsed {
+.admin-layout .sidebar.collapsed {
     width: 70px;
 }
 
@@ -337,7 +341,91 @@ body.auth-body {
     box-shadow: var(--shadow-sm);
     position: sticky;
     top: 0;
-    z-index: 1000;
+    z-index: 2000;
+    /* Ensure nav is always on top of ads */
+}
+
+/* Breaking News Ticker */
+.breaking-news-ticker {
+    background: #1e293b;
+    border-bottom: 2px solid var(--brand-red);
+    height: 40px;
+    overflow: hidden;
+    position: relative;
+    z-index: 10;
+}
+
+.ticker-wrapper {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding: 0 !important;
+}
+
+.ticker-label {
+    background: var(--brand-red);
+    color: #fff;
+    padding: 0 1.5rem;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    font-weight: 800;
+    font-size: 0.85rem;
+    z-index: 20;
+    position: relative;
+    white-space: nowrap;
+    clip-path: polygon(0 0, 90% 0, 100% 100%, 0% 100%);
+}
+
+.ticker-content {
+    flex: 1;
+    overflow: hidden;
+    height: 100%;
+    position: relative;
+}
+
+.ticker-scroll {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    height: 100%;
+    animation: ticker-scrolling 60s linear infinite;
+    padding-left: 2rem;
+}
+
+.ticker-scroll:hover {
+    animation-play-state: paused;
+}
+
+.ticker-item {
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-right: 3rem;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s;
+}
+
+.ticker-item:hover {
+    color: var(--brand-yellow);
+}
+
+.ticker-bullet {
+    color: var(--brand-red);
+    margin-right: 0.5rem;
+    font-weight: 900;
+}
+
+@keyframes ticker-scrolling {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
 }
 
 .pill-nav {
@@ -498,6 +586,11 @@ body.auth-body {
 }
 
 /* Sidebar */
+.site-sidebar {
+    width: 300px;
+    flex-shrink: 0;
+}
+
 .ad-container {
     background: #fff;
     padding: 1rem;
@@ -522,6 +615,28 @@ body.auth-body {
     color: #b45309;
     font-size: 0.75rem;
     font-weight: 700;
+}
+
+/* Ad Placement Overrides */
+.ad-placement {
+    display: block !important;
+    margin: 0 auto !important;
+    max-width: 100%;
+    position: static !important;
+    /* Force natural flow */
+    height: auto !important;
+    background: transparent !important;
+    z-index: 1 !important;
+}
+
+.ad-pos-sidebar {
+    width: 300px !important;
+    margin-bottom: 2rem !important;
+    position: static !important;
+}
+
+.ad-pos-top_banner {
+    margin-bottom: 2rem;
 }
 
 .must-read-card {

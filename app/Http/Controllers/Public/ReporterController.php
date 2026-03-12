@@ -16,6 +16,7 @@ class ReporterController extends Controller
         $articles = Article::with(['category', 'user'])
             ->where('user_id', $reporter->user_id)
             ->where('status', 'published')
+            ->where('moderation_status', 'approved')
             ->where('published_at', '<=', now())
             ->latest('published_at')
             ->paginate(12);

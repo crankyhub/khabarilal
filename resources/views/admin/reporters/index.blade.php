@@ -61,7 +61,13 @@
                 </td>
                 <td style="padding: 1rem; text-align: right;">
                     <div style="display: flex; gap: 0.75rem; justify-content: flex-end; align-items: center;">
-                        <a href="{{ route('admin.reporters.edit', $reporter) }}" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; border-color: var(--border);">Manage</a>
+                        @if(auth()->user()->isSuperAdmin() && auth()->id() !== $reporter->user_id)
+                            <form action="{{ route('admin.impersonate', $reporter->user) }}" method="POST" onsubmit="return confirm('Login as {{ $reporter->user->name }}?')">
+                                @csrf
+                                <button type="submit" style="background: none; border: none; cursor: pointer; padding: 0.4rem; font-size: 1.2rem;" title="Impersonate Reporter">👤</button>
+                            </form>
+                        @endif
+                        <a href="{{ route('admin.reporters.edit', $reporter) }}" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; border-color: var(--border); text-decoration: none;">Manage</a>
                         
                         <form action="{{ route('admin.reporters.toggle-status', $reporter->user) }}" method="POST">
                             @csrf

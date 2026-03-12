@@ -12,6 +12,7 @@ class SitemapController extends Controller
     public function index()
     {
         $articles = Article::where('status', 'published')
+            ->where('moderation_status', 'approved')
             ->where('published_at', '<=', now())
             ->latest('published_at')
             ->get();

@@ -38,9 +38,9 @@ class MediaController extends Controller
         return back()->with('success', 'Media uploaded successfully.');
     }
 
-    public function destroy(Media $media)
+    public function destroy(Media $medium)
     {
-        $media->delete();
+        $medium->delete();
         return back()->with('success', 'Media deleted successfully.');
     }
 

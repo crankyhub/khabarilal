@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\NewsletterController;
 use App\Http\Controllers\Admin\HealthController;
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\ImpersonationController;
 use App\Http\Controllers\Public\HomeController as PublicHomeController;
 use App\Http\Controllers\Public\ArticleController as PublicArticleController;
 
@@ -54,6 +55,9 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/logs', [ActivityLogController::class, 'index'])->name('logs.index');
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
     Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
+
+    Route::post('/impersonate/{user}', [ImpersonationController::class, 'impersonate'])->name('impersonate');
+    Route::post('/stop-impersonating', [ImpersonationController::class, 'stop'])->name('stop-impersonating');
 });
 
 Route::get('/article/{slug}', [PublicArticleController::class, 'show'])->name('article.show');
@@ -65,4 +69,5 @@ Route::get('/sitemap.xml', [\App\Http\Controllers\Public\SitemapController::clas
 Route::get('/swipe', [PublicHomeController::class, 'swipe'])->name('swipe.index');
 Route::post('/newsletter/subscribe', [\App\Http\Controllers\Public\NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
 Route::post('/article/{article}/comments', [\App\Http\Controllers\Public\CommentController::class, 'store'])->name('comments.store');
+Route::get('/ad/click/{ad}', [\App\Http\Controllers\Public\AdController::class, 'click'])->name('ads.click');
 Route::post('/article/{article}/rate', [\App\Http\Controllers\Public\RatingController::class, 'store'])->name('article.rate');
