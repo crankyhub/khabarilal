@@ -30,8 +30,13 @@ class ArticleController extends Controller
             'device_type' => $this->getDeviceType($request->userAgent()),
             'visited_at' => now(),
         ]);
+
+        // Generate Captcha for Comments
+        $num1 = rand(1, 10);
+        $num2 = rand(1, 10);
+        session(['comment_captcha' => $num1 + $num2]);
             
-        return view('articles.show', compact('article'));
+        return view('articles.show', compact('article', 'num1', 'num2'));
     }
 
     private function getDeviceType($userAgent)

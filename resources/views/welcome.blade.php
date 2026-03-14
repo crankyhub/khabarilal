@@ -79,38 +79,7 @@
         </div>
     </nav>
 
-    {{-- Breaking News Ticker --}}
-    @php
-        $breakingNews = \App\Models\Article::where('is_breaking', true)
-            ->where('status', 'published')
-            ->latest()
-            ->get();
-    @endphp
-
-    @if($breakingNews->count() > 0)
-        <div class="breaking-news-ticker">
-            <div class="container ticker-wrapper">
-                <div class="ticker-label">BREAKING</div>
-                <div class="ticker-content">
-                    <div class="ticker-scroll">
-                        @foreach($breakingNews as $news)
-                            <a href="{{ route('article.show', $news->slug) }}" class="ticker-item">
-                                <span class="ticker-bullet">•</span>
-                                {{ $news->title }}
-                            </a>
-                        @endforeach
-                        {{-- Duplicate for seamless loop --}}
-                        @foreach($breakingNews as $news)
-                            <a href="{{ route('article.show', $news->slug) }}" class="ticker-item">
-                                <span class="ticker-bullet">•</span>
-                                {{ $news->title }}
-                            </a>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
+    @include('partials.breaking-news')
     
     @php $topAd = \App\Helpers\AdHelper::getAd('top_banner', isset($currentCategory) ? $currentCategory->id : null); @endphp
     @if($topAd)
@@ -175,6 +144,7 @@
                             </div>
                             <div class="feed-item-info">
                                 <h3>{{ $article->title }}</h3>
+                                <p class="article-excerpt">{{ $article->summary ? strip_tags($article->summary) : \Str::limit(strip_tags($article->body), 180) }}</p>
                                 <div class="feed-item-meta">{{ $article->published_at ? $article->published_at->format('M d, Y h:i A') : $article->created_at->format('M d, Y h:i A') }} IST</div>
                             </div>
                         </a>

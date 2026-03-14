@@ -295,6 +295,7 @@
             </div>
         </div>
     </nav>
+    @include('partials.breaking-news')
 
     @php $topAd = \App\Helpers\AdHelper::getAd('top_banner', $article->category_id, $article->id); @endphp
     @if($topAd)
@@ -401,6 +402,89 @@
                 </div>
 
                 <div id="copy-toast" class="copy-toast">Link Copied to Clipboard!</div>
+
+                {{-- Comments Section --}}
+                <div class="comments-section" id="comments">
+                    <h3 class="comments-title">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="var(--brand-red)" style="vertical-align: middle; margin-right: 0.5rem;"><path d="M21 15c0 1.1-.9 2-2 2H7l-4 4V5c0-1.1.9-2 2-2h14c1.1 0 2 .9 2 2v10z"/></svg>
+                        Comments ({{ $article->comments()->where('is_approved', true)->count() }})
+                    </h3>
+
+                    @if(session('success'))
+                        <div style="background: #f0fdf4; color: #166534; padding: 1rem; border-radius: 8px; border: 1px solid #bbf7d0; margin-bottom: 2rem; font-weight: 600;">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    {{-- Comment Form --}}
+                    <div class="comment-form-card">
+                        <form action="{{ route('comments.store', $article->id) }}" method="POST">
+                            @csrf
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                                <div class="form-group">
+                                    <label class="form-label">Name <span style="color: var(--brand-red);">*</span></label>
+                                    <input type="text" name="user_name" class="form-control" required placeholder="Your full name">
+                                    @error('user_name') <small style="color: var(--brand-red);">{{ $message }}</small> @enderror
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Email ID</label>
+                                    <input type="email" name="email" class="form-control" placeholder="Optional: your@email.com">
+                                    @error('email') <small style="color: var(--brand-red);">{{ $message }}</small> @enderror
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Phone No.</label>
+                                    <input type="text" name="phone" class="form-control" placeholder="Optional: mobile number">
+                                    @error('phone') <small style="color: var(--brand-red);">{{ $message }}</small> @enderror
+                                </div>
+                            </div>
+                            <div style="margin-bottom: 1rem;">
+                                <div class="form-group">
+                                    <label class="form-label">Your Comment <span style="color: var(--brand-red);">*</span></label>
+                                    <textarea name="content" class="form-control" rows="4" required placeholder="Type your comment here..."></textarea>
+                                    @error('content') <small style="color: var(--brand-red);">{{ $message }}</small> @enderror
+                                </div>
+                            </div>
+                            <div style="margin-bottom: 1.5rem;">
+                                <div class="form-group">
+                                    <label class="form-label">Human Verification <span style="color: var(--brand-red);">*</span></label>
+                                    <div style="display: flex; align-items: center; gap: 1rem;">
+                                        <div style="background: #e2e8f0; padding: 0.75rem 1rem; border-radius: 0.5rem; font-weight: 800; color: var(--brand-black); font-size: 1.1rem; border: 1px solid #cbd5e1;">
+                                            {{ $num1 }} + {{ $num2 }} = ?
+                                        </div>
+                                        <input type="number" name="captcha" class="form-control" style="max-width: 120px;" required placeholder="Result">
+                                    </div>
+                                    @error('captcha') <small style="color: var(--brand-red); display: block; margin-top: 0.5rem;">{{ $message }}</small> @enderror
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="padding: 0.8rem 2rem; border-radius: 3rem; font-weight: 700;">Submit Comment</button>
+                        </form>
+                    </div>
+
+                    {{-- Approved Comments List --}}
+                    <div class="comments-list">
+                        @php $approvedComments = $article->comments()->where('is_approved', true)->latest()->get(); @endphp
+                        @forelse($approvedComments as $comment)
+                            <div class="comment-item">
+                                <div class="comment-avatar">
+                                    {{ substr($comment->user_name, 0, 1) }}
+                                </div>
+                                <div class="comment-body">
+                                    <div class="comment-header">
+                                        <span class="comment-author">{{ $comment->user_name }}</span>
+                                        <span class="comment-date">{{ $comment->created_at->diffForHumans() }}</span>
+                                    </div>
+                                    <div class="comment-text">
+                                        {{ $comment->content }}
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <div style="text-align: center; color: #94a3b8; padding: 2rem 0; font-style: italic;">
+                                No comments yet. Be the first to share your thoughts!
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
 
                 @if($article->gallery->count() > 0)
                     <div style="margin-top: 4rem;">

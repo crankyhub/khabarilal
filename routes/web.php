@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\HealthController;
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\ImpersonationController;
+use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Public\HomeController as PublicHomeController;
 use App\Http\Controllers\Public\ArticleController as PublicArticleController;
 
@@ -58,6 +59,10 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
     Route::post('/impersonate/{user}', [ImpersonationController::class, 'impersonate'])->name('impersonate');
     Route::post('/stop-impersonating', [ImpersonationController::class, 'stop'])->name('stop-impersonating');
+
+    // Profile Management
+    Route::get('/profile/password', [ProfileController::class, 'editPassword'])->name('profile.password.edit');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
 });
 
 Route::get('/article/{slug}', [PublicArticleController::class, 'show'])->name('article.show');

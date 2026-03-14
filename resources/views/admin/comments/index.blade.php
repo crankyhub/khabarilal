@@ -25,7 +25,12 @@
                 </td>
                 <td style="padding: 1rem;">
                     <div style="font-weight: 600;">{{ $comment->user_name }}</div>
-                    <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem;">{{ $comment->content }}</div>
+                    @if($comment->email || $comment->phone)
+                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.1rem;">
+                            {{ $comment->email }} {{ $comment->phone ? ' | ' . $comment->phone : '' }}
+                        </div>
+                    @endif
+                    <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.4rem;">{{ $comment->content }}</div>
                 </td>
                 <td style="padding: 1rem; font-size: 0.8rem;">
                     <a href="{{ route('article.show', $comment->article->slug) }}" target="_blank" style="color: var(--accent); text-decoration: none;">
@@ -36,7 +41,7 @@
                     <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
                         @if(!$comment->is_approved)
                             <form action="{{ route('admin.comments.approve', $comment->id) }}" method="POST">
-                                @csrf
+                                @csrf @method('PATCH')
                                 <button type="submit" class="btn btn-primary" style="font-size: 0.75rem; padding: 0.3rem 0.7rem;">Approve</button>
                             </form>
                         @endif

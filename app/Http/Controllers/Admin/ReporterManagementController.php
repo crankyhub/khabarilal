@@ -92,12 +92,19 @@ class ReporterManagementController extends Controller
             'bio' => 'nullable|string',
             'revenue_share' => 'required|numeric|min:0|max:100',
             'social_links' => 'nullable|array',
+            'password' => 'nullable|string|min:8',
         ]);
 
-        $reporter->user->update([
+        $userData = [
             'role' => $validated['role'],
             'status' => $validated['status'],
-        ]);
+        ];
+
+        if (!empty($validated['password'])) {
+            $userData['password'] = \Illuminate\Support\Facades\Hash::make($validated['password']);
+        }
+
+        $reporter->user->update($userData);
 
         $reporter->update([
             'beat' => $validated['beat'],

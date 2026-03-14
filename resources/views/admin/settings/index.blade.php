@@ -63,6 +63,19 @@
             <small style="color: var(--text-secondary);">This will change the main header's background color.</small>
         </div>
 
+        <div class="form-group">
+            <label class="form-label">Breaking News Speed (seconds)</label>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <input type="range" min="5" max="100" value="{{ $settings['ticker_speed'] }}" 
+                       oninput="this.nextElementSibling.value = this.value; document.getElementById('ticker_speed_num').value = this.value" 
+                       style="flex: 1; accent-color: var(--accent-red);">
+                <input type="number" name="ticker_speed" id="ticker_speed_num" 
+                       value="{{ $settings['ticker_speed'] }}" 
+                       class="form-control" style="width: 80px;" required>
+            </div>
+            <small style="color: var(--text-secondary);">Higher value means slower scrolling. Default: 15s.</small>
+        </div>
+
         <script>
             function randomizeHeaderColor() {
                 const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');

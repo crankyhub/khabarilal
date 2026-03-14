@@ -17,6 +17,7 @@ class SettingController extends Controller
             'site_favicon' => Setting::get('site_favicon'),
             'site_name' => Setting::get('site_name', 'Khabar-i-Lal'),
             'header_bg_color' => Setting::get('header_bg_color', '#f9c80e'),
+            'ticker_speed' => Setting::get('ticker_speed', '15'),
         ];
         return view('admin.settings.index', compact('settings'));
     }
@@ -29,11 +30,13 @@ class SettingController extends Controller
             'site_logo_height' => 'required|integer|min:20|max:200',
             'site_favicon' => 'nullable|image|mimes:ico,png,jpg,jpeg|max:512',
             'header_bg_color' => 'required|string|regex:/^#[a-fA-F0-9]{6}$/',
+            'ticker_speed' => 'required|integer|min:5|max:100',
         ]);
 
         Setting::set('site_name', $request->site_name);
         Setting::set('site_logo_height', $request->site_logo_height);
         Setting::set('header_bg_color', $request->header_bg_color);
+        Setting::set('ticker_speed', $request->ticker_speed);
 
         if ($request->hasFile('site_logo')) {
             // Delete old logo
