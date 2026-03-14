@@ -131,34 +131,80 @@
                 </div>
                 @endif
 
-                {{-- Horizontal Feed Item --}}
-                <div class="article-feed">
-                    @foreach($articles->slice(5, 5) as $article)
-                        <a href="{{ route('article.show', $article->slug) }}" class="feed-item-horizontal">
-                            <div class="feed-item-thumb">
-                                @if($article->media_id && $article->media)
-                                    <img src="{{ $article->media->url }}">
-                                @elseif($article->image_path)
-                                    <img src="{{ asset('storage/' . $article->image_path) }}">
-                                @endif
-                            </div>
-                            <div class="feed-item-info">
-                                <h3>{{ $article->title }}</h3>
-                                <p class="article-excerpt">{{ $article->summary ? strip_tags($article->summary) : \Str::limit(strip_tags($article->body), 180) }}</p>
-                                <div class="feed-item-meta">{{ $article->published_at ? $article->published_at->format('M d, Y h:i A') : $article->created_at->format('M d, Y h:i A') }} IST</div>
-                            </div>
-                        </a>
+                <div class="article-feed" id="article-load-container">
+                    @foreach($articles->slice(5) as $article)
+                        @include('partials.article-item', ['article' => $article])
                     @endforeach
-
-                    @php 
-                        $feedAd = \App\Helpers\AdHelper::getAd('in_feed', isset($currentCategory) ? $currentCategory->id : null); 
-                    @endphp
-                    @if($feedAd)
-                        <div style="margin: 2rem 0;">
-                            {!! \App\Helpers\AdHelper::render($feedAd) !!}
-                        </div>
-                    @endif
                 </div>
+
+                @if($articles->hasMorePages())
+                    <div style="text-align: center; margin: 3rem 0;">
+                        <button id="load-more-btn" data-page="1" class="load-more-btn">
+                            <span class="btn-text">LOAD MORE STORIES</span>
+                            <span class="btn-loader" style="display: none;">
+                                <svg class="spinner" viewBox="0 0 50 50"><circle cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle></svg>
+                            </span>
+                        </button>
+                    </div>
+                @endif
+
+                @php 
+                    $feedAd = \App\Helpers\AdHelper::getAd('in_feed', isset($currentCategory) ? $currentCategory->id : null); 
+                @endphp
+                @if($feedAd)
+                    <div style="margin: 2rem 0;">
+                        {!! \App\Helpers\AdHelper::render($feedAd) !!}
+                    </div>
+                @endif
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const loadMoreBtn = document.getElementById('load-more-btn');
+                        const container = document.getElementById('article-load-container');
+
+                        if (loadMoreBtn) {
+                            loadMoreBtn.addEventListener('click', function() {
+                                const page = parseInt(this.getAttribute('data-page')) + 1;
+                                const btnText = this.querySelector('.btn-text');
+                                const btnLoader = this.querySelector('.btn-loader');
+
+                                // Show loader
+                                btnText.style.display = 'none';
+                                btnLoader.style.display = 'inline-block';
+                                this.disabled = true;
+
+                                fetch(`${window.location.pathname}?page=${page}`, {
+                                    headers: {
+                                        'X-Requested-With': 'XMLHttpRequest'
+                                    }
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.html) {
+                                        container.insertAdjacentHTML('beforeend', data.html);
+                                        this.setAttribute('data-page', page);
+                                        
+                                        // Hide button if no more pages
+                                        if (!data.hasMore) {
+                                            this.parentElement.style.display = 'none';
+                                        }
+                                    }
+                                    
+                                    // Reset button
+                                    btnText.style.display = 'inline-block';
+                                    btnLoader.style.display = 'none';
+                                    this.disabled = false;
+                                })
+                                .catch(error => {
+                                    console.error('Error loading more articles:', error);
+                                    btnText.style.display = 'inline-block';
+                                    btnLoader.style.display = 'none';
+                                    this.disabled = false;
+                                });
+                            });
+                        }
+                    });
+                </script>
             </div>
 
             {{-- Sidebar --}}

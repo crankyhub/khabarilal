@@ -167,6 +167,62 @@ h4,
     line-clamp: 3;
 }
 
+/* Load More Button Styling */
+.load-more-btn {
+    background: white;
+    color: var(--brand-red);
+    border: 2px solid var(--brand-red);
+    padding: 0.8rem 2.5rem;
+    border-radius: 3rem;
+    font-weight: 800;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 220px;
+    letter-spacing: 0.5px;
+}
+
+.load-more-btn:hover {
+    background: var(--brand-red);
+    color: white;
+    box-shadow: 0 5px 15px rgba(190, 30, 45, 0.2);
+}
+
+.load-more-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.btn-loader {
+    width: 20px;
+    height: 20px;
+}
+
+.spinner {
+    animation: rotate 2s linear infinite;
+    width: 20px;
+    height: 20px;
+}
+
+.spinner circle {
+    stroke: currentColor;
+    stroke-linecap: round;
+    animation: dash 1.5s ease-in-out infinite;
+}
+
+@keyframes rotate {
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes dash {
+    0% { stroke-dasharray: 1, 150; stroke-dashoffset: 0; }
+    50% { stroke-dasharray: 90, 150; stroke-dashoffset: -35; }
+    100% { stroke-dasharray: 90, 150; stroke-dashoffset: -124; }
+}
+
 /* Comment System Styles */
 .comments-section {
     margin-top: 5rem;
@@ -1059,10 +1115,6 @@ body.auth-body {
 
     .feed-item-info h3 {
         font-size: 1.2rem;
-    }
-
-    .ticker-scroll {
-        animation-duration: 8s !important;
     }
 }
 

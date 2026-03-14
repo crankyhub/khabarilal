@@ -107,9 +107,9 @@
 <body>
     <a href="/" class="close-swipe">&times;</a>
 
-    <div class="swipe-container">
+    <div class="swipe-container" id="swipe-container">
         @foreach($articles as $article)
-        <div class="article-card" style="background-image: url('{{ $article->image_path ? asset('storage/' . $article->image_path) : 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=2070' }}');">
+        <div class="article-card unread-news" data-id="{{ $article->id }}" style="background-image: url('{{ $article->image_path ? asset('storage/' . $article->image_path) : 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=2070' }}');">
             <div class="card-overlay"></div>
             <div class="card-content">
                 <span class="category-tag">{{ $article->category->name }}</span>
@@ -127,15 +127,84 @@
         </div>
         @endforeach
 
+        {{-- Completion Slide --}}
+        <div class="article-card completion-slide" style="background: #0f172a; display: none; justify-content: center; align-items: center; text-align: center;">
+            <div class="card-overlay" style="background: radial-gradient(circle, rgba(30,41,59,1) 0%, rgba(15,23,42,1) 100%);"></div>
+            <div class="card-content">
+                <div style="font-size: 4rem; margin-bottom: 1.5rem;">🎉</div>
+                <h2 class="card-title">You're all caught up!</h2>
+                <p class="card-summary">You have read all news stories. You can visit again later for the latest updates.</p>
+                <div style="margin-top: 2rem;">
+                    <a href="/" class="btn-back-home" style="text-decoration: none; background: var(--accent); color: white; padding: 0.8rem 2rem; border-radius: 3rem; font-weight: 800; display: inline-block;">BACK TO HOME</a>
+                </div>
+            </div>
+        </div>
+
         @if($articles->isEmpty())
-        <div class="article-card" style="background: var(--bg-dark); justify-content: center; align-items: center; text-align: center;">
+        <div class="article-card" style="background: #0f172a; justify-content: center; align-items: center; text-align: center;">
              <div class="card-content">
                 <h2 class="card-title">Check back later!</h2>
                 <p class="card-summary">No stories available to swipe right now.</p>
-                <a href="/" class="btn btn-primary" style="text-decoration: none;">Back to Website</a>
+                <a href="/" style="text-decoration: none; background: var(--accent); color: white; padding: 0.8rem 2rem; border-radius: 3rem; font-weight: 800; display: inline-block;">Back to Website</a>
              </div>
         </div>
         @endif
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById('swipe-container');
+            const completionSlide = document.querySelector('.completion-slide');
+            const STORAGE_KEY = 'khabarilal_read_articles';
+            
+            // Get read IDs from localStorage
+            let readIds = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            
+            // Filter articles on load
+            const articles = document.querySelectorAll('.unread-news');
+            let visibleCount = 0;
+            
+            articles.forEach(article => {
+                const id = article.getAttribute('data-id');
+                if (readIds.includes(id)) {
+                    article.remove();
+                } else {
+                    visibleCount++;
+                }
+            });
+            
+            // Always show completion slide at the end
+            completionSlide.style.display = 'flex';
+            
+            // If no unread news, show completion slide immediately
+            if (visibleCount === 0 && articles.length > 0) {
+                // Already handled by completion slide being flex
+            }
+
+            // Intersection Observer to mark as read
+            const observerOptions = {
+                root: container,
+                threshold: 0.7 // Mark as read when 70% visible
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && entry.target.classList.contains('unread-news')) {
+                        const id = entry.target.getAttribute('data-id');
+                        if (!readIds.includes(id)) {
+                            readIds.push(id);
+                            // Keep last 200 IDs to prevent storage bloat
+                            if (readIds.length > 200) readIds.shift();
+                            localStorage.setItem(STORAGE_KEY, JSON.stringify(readIds));
+                        }
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.unread-news').forEach(article => {
+                observer.observe(article);
+            });
+        });
+    </script>
 </body>
 </html>
